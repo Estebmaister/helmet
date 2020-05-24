@@ -66,15 +66,13 @@ Hackers can exploit known vulnerabilities in Express/Node if they see that your 
 
 **[⬆ back to top](#table-of-contents)**
 
-### 3. Serve an HTML File
+### 3. Mitigate the Risk of Clickjacking with helmet.frameguard()
 
-You can respond to requests with a file using the `res.sendFile(path)` method. You can put it inside the `app.get('/', ...)` route handler. Behind the scenes, this method will set the appropriate headers to instruct your browser on how to handle the file you want to send, according to its type. Then it will read and send the file. This method needs an absolute file path. We recommend you to use the Node global variable `\_\_dirname` to calculate the path like this:
+Your page could be put in a `<frame>` or `<iframe>` without your consent. This can result in clickjacking attacks, among other things. Clickjacking is a technique of tricking a user into interacting with a page different from what the user thinks it is. This can be obtained executing your page in a malicious context, by mean of iframing. In that context a hacker can put a hidden layer over your page. Hidden buttons can be used to run bad scripts. This middleware sets the X-Frame-Options header. It restricts who can put your site in a frame. It has three modes: DENY, SAMEORIGIN, and ALLOW-FROM.
 
-```node
-absolutePath = __dirname + relativePath / file.ext;
-```
+We don’t need our app to be framed.
 
-- Changed handler `app.get("/", function(req, res) {res.sendFile(__dirname + "/views/index.html");})` in myApp.js.
+Use `helmet.frameguard()` passing with the configuration object `{action: 'deny'}`.
 
 **[⬆ back to top](#table-of-contents)**
 
