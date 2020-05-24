@@ -2,8 +2,9 @@
 
 =============================================
 
-![GitHub package.json version][gh-pack-json-v] ![GitHub package.json dependency version express][gh-pack-json-dep-v-express] ![Last commit][last-commit-bdg] [![Website][website-bdg]][website] [![MIT License][license-bdg]][license] [![Twitter Follow][twitter-bdg]][twitter]
+![GitHub package.json version][gh-pack-json-v] ![GitHub package.json dependency version express][gh-pack-json-dep-v-express] ![GitHub package.json dependency version helmet][gh-pack-json-dep-v-helmet] ![Last commit][last-commit-bdg] [![Website][website-bdg]][website] [![MIT License][license-bdg]][license] [![Twitter Follow][twitter-bdg]][twitter]
 [![Workflow badge][workflow-bdg]][glitch-workflow] [![PRs Welcome][prs-bdg]][prs-site]
+
 Created from the [FCC](https://freecodecamp.com) repository, to compile the lessons about node, express and helmet.
 
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/F1F31OD9K)
@@ -61,11 +62,7 @@ Install the Helmet package, then require it.
 
 ### 2. Hide Potentially Dangerous Information Using helmet.hidePoweredBy()
 
-As a reminder, this project is being built upon the following starter project on Glitch, or cloned from GitHub.
-
-Hackers can exploit known vulnerabilities in Express/Node if they see that your site is powered by Express. X-Powered-By: Express is sent in every request coming from Express by default. The helmet.hidePoweredBy() middleware will remove the X-Powered-By header. You can also explicitly set the header to something else, to throw people off. e.g. app.use(helmet.hidePoweredBy({ setTo: 'PHP 4.2.0' }))
-
-<!-- - Added `app.get("/", function(req, res) {res.send('Hello Express');})` to myApp.js. -->
+Hackers can exploit known vulnerabilities in Express/Node if they see that your site is powered by Express. X-Powered-By: Express is sent in every request coming from Express by default. The `helmet.hidePoweredBy()` middleware will remove the X-Powered-By header. You can also explicitly set the header to something else, to throw people off. e.g. `app.use(helmet.hidePoweredBy({ setTo: 'PHP 4.2.0' }))`
 
 **[⬆ back to top](#table-of-contents)**
 
@@ -302,6 +299,7 @@ There are also a couple of other methods which are used to negotiate a connectio
 [code-size-bdg]: https://img.shields.io/github/languages/code-size/estebmaister/helmet?style=plastic
 [gh-pack-json-v]: https://img.shields.io/github/package-json/v/estebmaister/helmet?color=blue&style=plastic&logo=github
 [gh-pack-json-dep-v-express]: https://img.shields.io/github/package-json/dependency-version/estebmaister/helmet/express?style=plastic&logo=express
+[gh-pack-json-dep-v-helmet]: https://img.shields.io/github/package-json/dependency-version/estebmaister/helmet/helmet?style=plastic&logo=helmet
 
 <!-- Glitch web and workflow -->
 
