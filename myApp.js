@@ -69,6 +69,8 @@ app.use(helmet.frameguard({ action: "deny" }));
 
 // Use `helmet.xssFilter()`
 
+app.use(helmet.xssFilter());
+
 /** 5) Avoid inferring the response MIME type - `helmet.noSniff()` */
 
 // Browsers can use content or MIME sniffing to override response `Content-Type`
