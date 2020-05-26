@@ -38,8 +38,8 @@ node server.js
 
 1. [Install and Require Helmet](#1-install-and-require-helmet)
 1. [Hide Potentially Dangerous Information Using helmet.hidePoweredBy()](#2-hide-potentially-dangerous-information-using-helmethidepoweredby)
-1. [Serve an HTML File](#3-serve-an-html-file)
-1. [Serve Static Assets](#4-serve-static-assets)
+1. [Mitigate the Risk of Clickjacking with helmet.frameguard()](#3-mitigate-the-risk-of-clickjacking-with-helmetframeguard)
+1. [Mitigate the Risk of Cross Site Scripting (XSS) Attacks with helmet.xssFilter()](#4-mitigate-the-risk-of-cross-site-scripting-xss-attacks-with-helmetxssFilter)
 1. [Serve JSON on a Specific Route](#5-serve-json-on-a-specific-route)
 1. [Use the .env File](#6-use-the-env-file)
 1. [Implement a Root-Level Request Logger Middleware](#7-implement-a-root-level-request-logger-middleware)
@@ -76,7 +76,17 @@ Use `helmet.frameguard()` passing with the configuration object `{action: 'deny'
 
 **[⬆ back to top](#table-of-contents)**
 
-### 4. Serve Static Assets
+### 4. Mitigate the Risk of Cross Site Scripting (XSS) Attacks with helmet.xssFilter()
+
+Cross-site scripting (XSS) is a frequent type of attack where malicious scripts are injected into vulnerable pages, with the purpose of stealing sensitive data like session cookies, or passwords.
+
+The basic rule to lower the risk of an XSS attack is simple: “Never trust user’s input”. As a developer you should always sanitize all the input coming from the outside. This includes data coming from forms, GET query urls, and even from POST bodies. Sanitizing means that you should find and encode the characters that may be dangerous e.g. <, >.
+
+Modern browsers can help mitigating the risk by adopting better software strategies. Often these are configurable via http headers.
+
+The X-XSS-Protection HTTP header is a basic protection. The browser detects a potential injected script using a heuristic filter. If the header is enabled, the browser changes the script code, neutralizing it.
+
+It still has limited support.
 
 An HTML server usually has one or more directories that are accessible by the user. You can place there the static assets needed by your application (stylesheets, scripts, images). In Express, you can put in place this functionality using the middleware `express.static(path)`, where the `path` parameter is the absolute path of the folder containing the assets. If you don’t know what middleware is... don’t worry, we will discuss in detail later. Basically, middleware are functions that intercept route handlers, adding some kind of information. A middleware needs to be mounted using the method `app.use(path, middlewareFunction)`. The first `path` argument is optional. If you don’t pass it, the middleware will be executed for all requests.
 
