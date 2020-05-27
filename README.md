@@ -41,7 +41,7 @@ node server.js
 1. [Mitigate the Risk of Clickjacking with helmet.frameguard()](#3-mitigate-the-risk-of-clickjacking-with-helmetframeguard)
 1. [Mitigate the Risk of Cross Site Scripting (XSS) Attacks with helmet.xssFilter()](#4-mitigate-the-risk-of-cross-site-scripting-xss-attacks-with-helmetxssFilter)
 1. [Avoid Inferring the Response MIME Type with helmet.noSniff()](#5-avoid-inferring-the-response-mime-type-with-helmetnosniff)
-1. [Use the .env File](#6-use-the-env-file)
+1. [Prevent IE from Opening Untrusted HTML with helmet.ieNoOpen()](#6-prevent-ie-from-opening-untrusted-html-with-helmetienoopen)
 1. [Implement a Root-Level Request Logger Middleware](#7-implement-a-root-level-request-logger-middleware)
 1. [Chain Middleware to Create a Time Server](#8-chain-middleware-to-Create-a-time-server)
 1. [Get Route Parameter Input from the Client](#9-get-route-parameter-input-from-the-client)
@@ -96,33 +96,9 @@ Browsers can use content or MIME sniffing to adapt to different datatypes coming
 
 **[⬆ back to top](#table-of-contents)**
 
-### 6. Use the .env File
+### 6. Prevent IE from Opening Untrusted HTML with helmet.ieNoOpen()
 
-The `.env` file is a hidden file that is used to pass environment variables to your application. This file is secret, no one but you can access it, and it can be used to store data that you want to keep private or hidden. For example, you can store API keys from external services or your database URI. You can also use it to store configuration options. By setting configuration options, you can change the behavior of your application, without the need to rewrite some code.
-
-The environment variables are accessible from the app as `process.env.VAR_NAME`. The `process.env` object is a global Node object, and variables are passed as strings. By convention, the variable names are all uppercase, with words separated by an underscore. The `.env` is a shell file, so you don’t need to wrap names or values in quotes. It is also important to note that there cannot be space around the equals sign when you are assigning values to your variables, e.g. `VAR_NAME=value`. Usually, you will put each variable definition on a separate line.
-
-- Added the following code to myApp.js.
-
-```node
-message = "Hello json";
-
-if (process.env.MESSAGE_STYLE === "uppercase") {
-  message = message.toUpperCase();
-}
-
-app.get("/json", function (req, res) {
-  res.json({ message: message });
-});
-```
-
-For this to work you have to pass the variable in your terminal or install other dependencies for .env files.
-
-i.e. `npx cross-env MESSAGE_STYLE=uppercase node server`
-
-For Linux Mac or Windows after install **cross-env**, or `npx node-env-run server` with **node-env-run** and the `.dev` file.
-
-Another possible choice is **dotenv** with an extra line the code: `require('dotenv').config();` at the top of your `js` for load all the variables in `.env`.
+Some web applications will serve untrusted HTML for download. Some versions of Internet Explorer by default open those HTML files in the context of your site. This means that an untrusted HTML page could start doing bad things in the context of your pages. This middleware sets the X-Download-Options header to noopen. This will prevent IE users from executing downloads in the trusted site’s context.
 
 **[⬆ back to top](#table-of-contents)**
 
