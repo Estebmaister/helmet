@@ -39,11 +39,11 @@ node server.js
 1. [Install and Require Helmet](#1-install-and-require-helmet)
 1. [Hide Potentially Dangerous Information Using helmet.hidePoweredBy()](#2-hide-potentially-dangerous-information-using-helmethidepoweredby)
 1. [Mitigate the Risk of Clickjacking with helmet.frameguard()](#3-mitigate-the-risk-of-clickjacking-with-helmetframeguard)
-1. [Mitigate the Risk of Cross Site Scripting (XSS) Attacks with helmet.xssFilter()](#4-mitigate-the-risk-of-cross-site-scripting-xss-attacks-with-helmetxssFilter)
+1. [Mitigate the Risk of Cross Site Scripting (XSS) Attacks with helmet.xssFilter()](#4-mitigate-the-risk-of-cross-site-scripting-xss-attacks-with-helmetxssfilter)
 1. [Avoid Inferring the Response MIME Type with helmet.noSniff()](#5-avoid-inferring-the-response-mime-type-with-helmetnosniff)
 1. [Prevent IE from Opening Untrusted HTML with helmet.ieNoOpen()](#6-prevent-ie-from-opening-untrusted-html-with-helmetienoopen)
-1. [Implement a Root-Level Request Logger Middleware](#7-implement-a-root-level-request-logger-middleware)
-1. [Chain Middleware to Create a Time Server](#8-chain-middleware-to-Create-a-time-server)
+1. [Ask Browsers to Access Your Site via HTTPS Only with helmet.hsts()](#7-ask-browsers-to-access-your-site-via-https-only-with-helmethsts)
+1. [Disable DNS Prefetching - helmet.dnsPrefetchControl()](#8-disable-dns-prefetching-helmetdnsprefetchcontrol)
 1. [Get Route Parameter Input from the Client](#9-get-route-parameter-input-from-the-client)
 1. [Get Query Parameter Input from the Client](#10-get-query-parameter-input-from-the-client)
 1. [Use body-parser to Parse POST Requests](#11-use-body-parser-to-parse-post-requests)
@@ -102,68 +102,28 @@ Some web applications will serve untrusted HTML for download. Some versions of I
 
 **[⬆ back to top](#table-of-contents)**
 
-### 7. Implement a Root-Level Request Logger Middleware
+### 7. Ask Browsers to Access Your Site via HTTPS Only with helmet.hsts()
 
-Earlier, you were introduced to the `express.static()` middleware function. Now it’s time to see what middleware is, in more detail. Middleware functions are functions that take 3 arguments: the request object, the response object, and the next function in the application’s request-response cycle. These functions execute some code that can have side effects on the app, and usually add information to the request or response objects. They can also end the cycle by sending a response when some condition is met. If they don’t send the response when they are done, they start the execution of the next function in the stack. This triggers calling the 3rd argument, `next()`.
+HTTP Strict Transport Security (HSTS) is a web security policy which helps to protect websites against protocol downgrade attacks and cookie hijacking. If your website can be accessed via HTTPS you can ask user’s browsers to avoid using insecure HTTP. By setting the header Strict-Transport-Security, you tell the browsers to use HTTPS for the future requests in a specified amount of time. This will work for the requests coming after the initial request.
 
-Look at the following example:
+Configure `helmet.hsts()` to use HTTPS for the next 90 days. Pass the config object `{maxAge: timeInSeconds, force: true}`. Glitch already has hsts enabled. To override its settings you need to set the field "force" to true in the config object. We will intercept and restore the Glitch header, after inspecting it for testing.
 
-```node
-function(req, res, next) {
-  console.log("I'm a middleware...");
-  next();
-}
-```
-
-Let’s suppose you mounted this function on a route. When a request matches the route, it displays the string “I’m a middleware…”, then it executes the next function in the stack. In this exercise, you are going to build root-level middleware. As you have seen in challenge 4, to mount a middleware function at root level, you can use the `app.use(<mware-function>)` method. In this case, the function will be executed for all the requests, but you can also set more specific conditions. For example, if you want a function to be executed only for POST requests, you could use `app.post(<mware-function>)`. Analogous methods exist for all the HTTP verbs (GET, DELETE, PUT, …).
-
-- Added this code to the beginning of the myApp.js file:
-
-```node
-app.use("/", function (req, res, next) {
-  const { method, path, ip } = req;
-  console.log(`${method} ${path} - ${ip}`);
-  next();
-});
-```
+Note: Configuring HTTPS on a custom website requires the acquisition of a domain, and a SSL/TSL Certificate.
 
 **[⬆ back to top](#table-of-contents)**
 
-### 8. Chain Middleware to Create a Time Server
+### 8. Disable DNS Prefetching - helmet.dnsPrefetchControl()
 
-Middleware can be mounted at a specific route using app.METHOD(path, middlewareFunction). Middleware can also be chained inside route definition.
+To improve performance, most browsers prefetch DNS records for the links in
+a page. In that way the destination ip is already known when the user clicks on a link.
+This may lead to over-use of the DNS service (if you own a big website,
+visited by millions people...), privacy issues (one eavesdropper could infer
+that you are on a certain page - even if encrypted -, from the links you are
+prefecthing), or page statistics alteration (some links may appear visited
+even if they are not). If you have high security needs you can disable
+DNS prefetching, at the cost of a performance penalty.
 
-Look at the following example:
-
-```node
-app.get(
-  "/user",
-  function (req, res, next) {
-    req.user = getTheUserSync(); // Hypothetical synchronous operation
-    next();
-  },
-  function (req, res) {
-    res.send(req.user);
-  }
-);
-```
-
-This approach is useful to split the server operations into smaller units. That leads to a better app structure, and the possibility to reuse code in different places. This approach can also be used to perform some validation on the data. At each point of the middleware stack you can block the execution of the current chain and pass control to functions specifically designed to handle errors. Or you can pass control to the next matching route, to handle special cases. We will see how in the advanced Express section.
-
-- Added the following code to myApp.js:
-
-```node
-app.get(
-  "/now",
-  function (req, res, next) {
-    req.time = new Date().toString();
-    next();
-  },
-  function (req, res) {
-    res.json({ time: req.time });
-  }
-);
-```
+Use `helmet.dnsPrefetchControl()`
 
 **[⬆ back to top](#table-of-contents)**
 
