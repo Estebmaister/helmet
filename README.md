@@ -43,8 +43,8 @@ node server.js
 1. [Avoid Inferring the Response MIME Type with helmet.noSniff()](#5-avoid-inferring-the-response-mime-type-with-helmetnosniff)
 1. [Prevent IE from Opening Untrusted HTML with helmet.ieNoOpen()](#6-prevent-ie-from-opening-untrusted-html-with-helmetienoopen)
 1. [Ask Browsers to Access Your Site via HTTPS Only with helmet.hsts()](#7-ask-browsers-to-access-your-site-via-https-only-with-helmethsts)
-1. [Disable DNS Prefetching - helmet.dnsPrefetchControl()](#8-disable-dns-prefetching-helmetdnsprefetchcontrol)
-1. [Get Route Parameter Input from the Client](#9-get-route-parameter-input-from-the-client)
+1. [Disable DNS Prefetching with helmet.dnsPrefetchControl()](#8-disable-dns-prefetching-with-helmetdnsprefetchcontrol)
+1. [Disable Client-Side Caching with helmet.noCache()](#9-disable-client-side-caching-with-helmetnocache)
 1. [Get Query Parameter Input from the Client](#10-get-query-parameter-input-from-the-client)
 1. [Use body-parser to Parse POST Requests](#11-use-body-parser-to-parse-post-requests)
 1. [Get Data from POST Requests](#12-get-data-from-post-requests)
@@ -112,36 +112,19 @@ Note: Configuring HTTPS on a custom website requires the acquisition of a domain
 
 **[⬆ back to top](#table-of-contents)**
 
-### 8. Disable DNS Prefetching - helmet.dnsPrefetchControl()
+### 8. Disable DNS Prefetching with helmet.dnsPrefetchControl()
 
-To improve performance, most browsers prefetch DNS records for the links in
-a page. In that way the destination ip is already known when the user clicks on a link.
-This may lead to over-use of the DNS service (if you own a big website,
-visited by millions people...), privacy issues (one eavesdropper could infer
-that you are on a certain page - even if encrypted -, from the links you are
-prefecthing), or page statistics alteration (some links may appear visited
-even if they are not). If you have high security needs you can disable
-DNS prefetching, at the cost of a performance penalty.
+To improve performance, most browsers prefetch DNS records for the links in a page. In that way the destination ip is already known when the user clicks on a link. This may lead to over-use of the DNS service (if you own a big website, visited by millions people…), privacy issues (one eavesdropper could infer that you are on a certain page), or page statistics alteration (some links may appear visited even if they are not). If you have high security needs you can disable DNS prefetching, at the cost of a performance penalty.
 
 Use `helmet.dnsPrefetchControl()`
 
 **[⬆ back to top](#table-of-contents)**
 
-### 9. Get Route Parameter Input from the Client
+### 9. Disable Client-Side Caching with helmet.noCache()
 
-When building an API, we have to allow users to communicate to us what they want to get from our service. For example, if the client is requesting information about a user stored in the database, they need a way to let us know which user they're interested in. One possible way to achieve this result is by using route parameters. Route parameters are named segments of the URL, delimited by slashes (/). Each segment captures the value of the part of the URL which matches its position. The captured values can be found in the `req.params` object.
+If you are releasing an update for your website, and you want the users to always download the newer version, you can (try to) disable caching on client’s browser. It can be useful in development too. Caching has performance benefits, which you will lose, so only use this option when there is a real need.
 
-```node
-route_path: '/user/:userId/book/:bookId'
-actual_request_URL: '/user/546/book/6754'
-req.params: {userId: '546', bookId: '6754'}
-```
-
-- Added the following line of code to myApp.js:
-
-```node
-app.get("/:word/echo", (req, res) => res.json({ echo: req.params.word }));
-```
+Use `helmet.noCache()`
 
 **[⬆ back to top](#table-of-contents)**
 
