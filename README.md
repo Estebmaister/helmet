@@ -45,7 +45,7 @@ node server.js
 1. [Ask Browsers to Access Your Site via HTTPS Only with helmet.hsts()](#7-ask-browsers-to-access-your-site-via-https-only-with-helmethsts)
 1. [Disable DNS Prefetching with helmet.dnsPrefetchControl()](#8-disable-dns-prefetching-with-helmetdnsprefetchcontrol)
 1. [Disable Client-Side Caching with helmet.noCache()](#9-disable-client-side-caching-with-helmetnocache)
-1. [Get Query Parameter Input from the Client](#10-get-query-parameter-input-from-the-client)
+1. [Information Security with HelmetJS - Set a Content Security Policy with helmet.contentSecurityPolicy()](#10-information-security-with-helmetjs---set-a-content-security-policy-with-helmetcontentsecuritypolicy)
 1. [Use body-parser to Parse POST Requests](#11-use-body-parser-to-parse-post-requests)
 1. [Get Data from POST Requests](#12-get-data-from-post-requests)
 
@@ -128,24 +128,15 @@ Use `helmet.noCache()`
 
 **[⬆ back to top](#table-of-contents)**
 
-### 10. Get Query Parameter Input from the Client
+### 10. Information Security with HelmetJS - Set a Content Security Policy with helmet.contentSecurityPolicy()
 
-Another common way to get input from the client is by encoding the data after the route path, using a query string. The query string is delimited by a question mark (?), and includes field=value couples. Each couple is separated by an ampersand (&). Express can parse the data from the query string, and populate the object req.query. Some characters, like the percent (%), cannot be in URLs and have to be encoded in a different format before you can send them. If you use the API from JavaScript, you can use specific methods to encode/decode these characters.
+This challenge highlights one promising new defense that can significantly reduce the risk and impact of many type of attacks in modern browsers. By setting and configuring a Content Security Policy you can prevent the injection of anything unintended into your page. This will protect your app from XSS vulnerabilities, undesired tracking, malicious frames, and much more. CSP works by defining a whitelist of content sources which are trusted. You can configure them for each kind of resource a web page may need (scripts, stylesheets, fonts, frames, media, and so on…). There are multiple directives available, so a website owner can have a granular control. See HTML 5 Rocks, KeyCDN for more details. Unfortunately CSP is unsupported by older browser.
 
-```node
-route_path: '/library'
-actual_request_URL: '/library?userId=546&bookId=6754'
-req.query: {userId: '546', bookId: '6754'}
-```
+By default, directives are wide open, so it’s important to set the defaultSrc directive as a fallback. Helmet supports both defaultSrc and default-src naming styles. The fallback applies for most of the unspecified directives.
 
-- Added to myApp.js:
+In this exercise, use `helmet.contentSecurityPolicy()`, and configure it setting the `defaultSrc directive` to `["'self'"]` (the list of allowed sources must be in an array), in order to trust only your website address by default. Set also the `scriptSrc` directive so that you will allow scripts to be downloaded from your website, and from the domain 'trusted-cdn.com'.
 
-```node
-app
-  .route("/name")
-  .get((req, res) => res.json({ name: `${req.query.first} ${req.query.last}` }))
-  .post();
-```
+Hint: in the `self` keyword, the single quotes are part of the keyword itself, so it needs to be enclosed in double quotes to be working.
 
 **[⬆ back to top](#table-of-contents)**
 
