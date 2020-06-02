@@ -1,4 +1,4 @@
-# Free Code Camp - Applied InfoSec Challenges
+# Applied InfoSec Challenges for FCC project
 
 =============================================
 
@@ -11,7 +11,7 @@ Created from the [FCC](https://freecodecamp.com) repository, to compile the less
 
 Start with an empty repository and making the git init as follows:
 
-```git
+```shell
 git init
 git clone https://github.com/Estebmaister/helmet.git
 ```
@@ -22,14 +22,14 @@ Adding the files from the original repo in FCC and start to coding.
 
 To install all the dependencies :
 
-```npm
+```shell
 npm install
 ```
 
 To run the server
 
-```node
-node server.js
+```shell
+npm start
 ```
 
 ## Challenges
@@ -46,14 +46,18 @@ node server.js
 1. [Disable DNS Prefetching with helmet.dnsPrefetchControl()](#8-disable-dns-prefetching-with-helmetdnsprefetchcontrol)
 1. [Disable Client-Side Caching with helmet.noCache()](#9-disable-client-side-caching-with-helmetnocache)
 1. [Information Security with HelmetJS - Set a Content Security Policy with helmet.contentSecurityPolicy()](#10-information-security-with-helmetjs---set-a-content-security-policy-with-helmetcontentsecuritypolicy)
-1. [Use body-parser to Parse POST Requests](#11-use-body-parser-to-parse-post-requests)
+1. [Configure Helmet Using the 'parent' helmet() Middleware](#11-configure-helmet-using-the-parent-helmet-middleware)
 1. [Get Data from POST Requests](#12-get-data-from-post-requests)
 
 ### 1. Install and Require Helmet
 
-Helmet helps you secure your Express apps by setting various HTTP headers.
+[Helmet](https://github.com/helmetjs/helmet) helps you secure your Express apps by setting various HTTP headers.
 
 Install the Helmet package, then require it.
+
+```shell
+npm install helmet --save
+```
 
 - Added `helmet` dependency to package.json.
 - Added `const helmet = require("helmet");` to myApp.js.
@@ -64,15 +68,19 @@ Install the Helmet package, then require it.
 
 Hackers can exploit known vulnerabilities in Express/Node if they see that your site is powered by Express. X-Powered-By: Express is sent in every request coming from Express by default. The `helmet.hidePoweredBy()` middleware will remove the X-Powered-By header. You can also explicitly set the header to something else, to throw people off. e.g. `app.use(helmet.hidePoweredBy({ setTo: 'PHP 4.2.0' }))`
 
+- Added to myApp.js `app.use(hidePoweredBy({ setTo: "PHP 4.2.0" }));`
+
 **[⬆ back to top](#table-of-contents)**
 
 ### 3. Mitigate the Risk of Clickjacking with helmet.frameguard()
 
-Your page could be put in a `<frame>` or `<iframe>` without your consent. This can result in clickjacking attacks, among other things. Clickjacking is a technique of tricking a user into interacting with a page different from what the user thinks it is. This can be obtained executing your page in a malicious context, by mean of iframing. In that context a hacker can put a hidden layer over your page. Hidden buttons can be used to run bad scripts. This middleware sets the X-Frame-Options header. It restricts who can put your site in a frame. It has three modes: DENY, SAMEORIGIN, and ALLOW-FROM.
+Your page could be put in a `<frame>` or `<iframe>` without your consent. This can result in [clickjacking attacks](https://en.wikipedia.org/wiki/Clickjacking), among other things. Clickjacking is a technique of tricking a user into interacting with a page different from what the user thinks it is. This can be obtained executing your page in a malicious context, by mean of iframing. In that context a hacker can put a hidden layer over your page. Hidden buttons can be used to run bad scripts. This middleware sets the X-Frame-Options header. It restricts who can put your site in a frame. It has three modes: DENY, SAMEORIGIN, and ALLOW-FROM.
 
 We don’t need our app to be framed.
 
 Use `helmet.frameguard()` passing with the configuration object `{action: 'deny'}`.
+
+- Added to myApp.js `app.use(frameguard({ action: "deny" }));`
 
 **[⬆ back to top](#table-of-contents)**
 
@@ -81,6 +89,7 @@ Use `helmet.frameguard()` passing with the configuration object `{action: 'deny'
 Cross-site scripting (XSS) is a frequent type of attack where malicious scripts are injected into vulnerable pages, with the purpose of stealing sensitive data like session cookies, or passwords.
 
 The basic rule to lower the risk of an XSS attack is simple: “Never trust user’s input”. As a developer you should always sanitize all the input coming from the outside. This includes data coming from forms, GET query urls, and even from POST bodies. Sanitizing means that you should find and encode the characters that may be dangerous e.g. <, >.
+More Info [here](<https://www.owasp.org/index.php/XSS_(Cross_Site_Scripting)_Prevention_Cheat_Sheet>).
 
 Modern browsers can help mitigating the risk by adopting better software strategies. Often these are configurable via http headers.
 
@@ -88,17 +97,23 @@ The X-XSS-Protection HTTP header is a basic protection. The browser detects a po
 
 It still has limited support.
 
+- Added to myApp.js `app.use(helmet.xssFilter());`
+
 **[⬆ back to top](#table-of-contents)**
 
 ### 5. Avoid Inferring the Response MIME Type with helmet.noSniff()
 
 Browsers can use content or MIME sniffing to adapt to different datatypes coming from a response. They override the Content-Type headers to guess and process the data. While this can be convenient in some scenarios, it can also lead to some dangerous attacks. This middleware sets the X-Content-Type-Options header to nosniff. This instructs the browser to not bypass the provided Content-Type.
 
+- Added to myApp.js `app.use(helmet.noSniff());`
+
 **[⬆ back to top](#table-of-contents)**
 
 ### 6. Prevent IE from Opening Untrusted HTML with helmet.ieNoOpen()
 
 Some web applications will serve untrusted HTML for download. Some versions of Internet Explorer by default open those HTML files in the context of your site. This means that an untrusted HTML page could start doing bad things in the context of your pages. This middleware sets the X-Download-Options header to noopen. This will prevent IE users from executing downloads in the trusted site’s context.
+
+- Added to myApp.js `app.use(helmet.ieNoOpen());`
 
 **[⬆ back to top](#table-of-contents)**
 
@@ -108,6 +123,14 @@ HTTP Strict Transport Security (HSTS) is a web security policy which helps to pr
 
 Configure `helmet.hsts()` to use HTTPS for the next 90 days. Pass the config object `{maxAge: timeInSeconds, force: true}`. Glitch already has hsts enabled. To override its settings you need to set the field "force" to true in the config object. We will intercept and restore the Glitch header, after inspecting it for testing.
 
+- Added to myApp.js:
+
+```node
+const ninetyDaysInSeconds = 90 * 24 * 60 * 60;
+
+app.use(helmet.hsts({ maxAge: ninetyDaysInSeconds, force: true }));
+```
+
 Note: Configuring HTTPS on a custom website requires the acquisition of a domain, and a SSL/TSL Certificate.
 
 **[⬆ back to top](#table-of-contents)**
@@ -116,7 +139,7 @@ Note: Configuring HTTPS on a custom website requires the acquisition of a domain
 
 To improve performance, most browsers prefetch DNS records for the links in a page. In that way the destination ip is already known when the user clicks on a link. This may lead to over-use of the DNS service (if you own a big website, visited by millions people…), privacy issues (one eavesdropper could infer that you are on a certain page), or page statistics alteration (some links may appear visited even if they are not). If you have high security needs you can disable DNS prefetching, at the cost of a performance penalty.
 
-Use `helmet.dnsPrefetchControl()`
+- Added to myApp.js `app.use(helmet.dnsPrefetchControl());`
 
 **[⬆ back to top](#table-of-contents)**
 
@@ -124,13 +147,13 @@ Use `helmet.dnsPrefetchControl()`
 
 If you are releasing an update for your website, and you want the users to always download the newer version, you can (try to) disable caching on client’s browser. It can be useful in development too. Caching has performance benefits, which you will lose, so only use this option when there is a real need.
 
-Use `helmet.noCache()`
+- Added to myApp.js `app.use(helmet.noCache());`
 
 **[⬆ back to top](#table-of-contents)**
 
 ### 10. Information Security with HelmetJS - Set a Content Security Policy with helmet.contentSecurityPolicy()
 
-This challenge highlights one promising new defense that can significantly reduce the risk and impact of many type of attacks in modern browsers. By setting and configuring a Content Security Policy you can prevent the injection of anything unintended into your page. This will protect your app from XSS vulnerabilities, undesired tracking, malicious frames, and much more. CSP works by defining a whitelist of content sources which are trusted. You can configure them for each kind of resource a web page may need (scripts, stylesheets, fonts, frames, media, and so on…). There are multiple directives available, so a website owner can have a granular control. See HTML 5 Rocks, KeyCDN for more details. Unfortunately CSP is unsupported by older browser.
+This challenge highlights one promising new defense that can significantly reduce the risk and impact of many type of attacks in modern browsers. By setting and configuring a Content Security Policy you can prevent the injection of anything unintended into your page. This will protect your app from XSS vulnerabilities, undesired tracking, malicious frames, and much more. CSP works by defining a whitelist of content sources which are trusted. You can configure them for each kind of resource a web page may need (scripts, stylesheets, fonts, frames, media, and so on…). There are multiple directives available, so a website owner can have a granular control. See [HTML 5 Rocks](http://www.html5rocks.com/en/tutorials/security/content-security-policy/), [KeyCDN](https://www.keycdn.com/support/content-security-policy/) for more details. Unfortunately CSP is unsupported by older browser.
 
 By default, directives are wide open, so it’s important to set the defaultSrc directive as a fallback. Helmet supports both defaultSrc and default-src naming styles. The fallback applies for most of the unspecified directives.
 
@@ -138,28 +161,47 @@ In this exercise, use `helmet.contentSecurityPolicy()`, and configure it setting
 
 Hint: in the `self` keyword, the single quotes are part of the keyword itself, so it needs to be enclosed in double quotes to be working.
 
-**[⬆ back to top](#table-of-contents)**
+- Added to myApp.js:
 
-### 11. Use body-parser to Parse POST Requests
-
-Besides GET, there is another common HTTP verb, it is POST. POST is the default method used to send client data with HTML forms. In REST convention, POST is used to send data to create new items in the database (a new user, or a new blog post). You don’t have a database in this project, but you are going to learn how to handle POST requests anyway.
-
-In these kind of requests, the data doesn’t appear in the URL, it is hidden in the request body. This is a part of the HTML request, also called payload. Since HTML is text-based, even if you don’t see the data, it doesn’t mean that it is secret. The raw content of an HTTP POST request is shown below:
-
-```http
-POST /path/subpath HTTP/1.0
-From: john@example.com
-User-Agent: someBrowser/1.0
-Content-Type: application/x-www-form-urlencoded
-Content-Length: 20
-name=John+Doe&age=25
+```node
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "trusted-cdn.com"],
+    },
+  })
+);
 ```
 
-As you can see, the body is encoded like the query string. This is the default format used by HTML forms. With Ajax, you can also use JSON to handle data having a more complex structure. There is also another type of encoding: multipart/form-data. This one is used to upload binary files. In this exercise, you will use a urlencoded body. To parse the data coming from POST requests, you have to install the `body-parser` package. This package allows you to use a series of middleware, which can decode data in different formats.
+**[⬆ back to top](#table-of-contents)**
 
-- Installed `body-parser` module in `package.json`.
-- Added `const bodyParser = require("body-parser")` to the top of myApp.js file.
-- Added the following code to myApp.js: `app.use(bodyParser.urlencoded({ extended: false }));`
+### 11. Configure Helmet Using the 'parent' helmet() Middleware
+
+`app.use(helmet())` will automatically include all the middleware introduced above, except `noCache()`, and `contentSecurityPolicy()`, but these can be enabled if necessary. You can also disable or configure any other middleware individually, using a configuration object.
+
+#### Example:
+
+```node
+app.use(
+  helmet({
+    frameguard: {
+      // configure
+      action: "deny",
+    },
+    contentSecurityPolicy: {
+      // enable and configure
+      directives: {
+        defaultSrc: ["self"],
+        styleSrc: ["style.com"],
+      },
+    },
+    dnsPrefetchControl: false, // disable
+  })
+);
+```
+
+We introduced each middleware separately for teaching purposes and for ease of testing. Using the ‘parent’ `helmet()` middleware is easy to implement in a real project.
 
 **[⬆ back to top](#table-of-contents)**
 
