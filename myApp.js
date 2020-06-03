@@ -99,12 +99,27 @@ app.use(
 
 module.exports = app;
 const api = require("./server.js");
-app.use(express.static("public"));
 app.disable("strict-transport-security");
 app.use("/_api", api);
-app.get("/", function (request, response) {
-  response.sendFile(path.join(__dirname, "views", "index.html"));
+
+app.get("/", (request, response) =>
+  response.sendFile(path.join(__dirname, "views", "index.html"))
+);
+
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("/ip", (req, res) => {
+  console.log(req.ip);
+  let ip = req.ip.split(":");
+  let ip_details = req.socket.address();
+  console.log(ip_details); // { address: '::ffff:127.0.0.1', family: 'IPv6', port: 3000
+  ip[3] ? res.json({ ip: ip[3] }) : res.json({ ip: ip[0] });
 });
-const listener = app.listen(process.env.PORT || 3000, function () {
-  console.log("Your app is listening on port " + listener.address().port);
-});
+
+const listener = app.listen(process.env.PORT || 3000, "localhost", () =>
+  console.log(
+    `Your app is listening at http://${listener.address().address}:${
+      listener.address().port
+    }`
+  )
+);
