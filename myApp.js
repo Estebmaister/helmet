@@ -95,13 +95,6 @@ app.use(
 // ease of testing. Using the 'parent' `helmet()` middleware is easiest, and
 // cleaner, for a real project.
 
-// ---- DO NOT EDIT BELOW THIS LINE ---------------------------------------
-
-module.exports = app;
-const api = require("./server.js");
-app.disable("strict-transport-security");
-app.use("/_api", api);
-
 app.get("/", (request, response) =>
   response.sendFile(path.join(__dirname, "views", "index.html"))
 );
@@ -123,3 +116,10 @@ const listener = app.listen(process.env.PORT || 3000, "localhost", () =>
     }`
   )
 );
+
+// ---- DO NOT EDIT BELOW THIS LINE ---------------------------------------
+
+module.exports = app;
+const api = require("./server.js");
+app.disable("strict-transport-security");
+app.use("/_api", api);
