@@ -5,8 +5,9 @@
 
 const express = require("express"); // Do Not Edit
 const app = express(); // Do Not Edit
-
+const path = require("path");
 const helmet = require("helmet");
+const noCache = require("nocache");
 
 /** 2) Hide potentially dangerous information - `helmet.hidePoweredBy()` */
 
@@ -60,6 +61,8 @@ const helmet = require("helmet");
 // but these can be enabled if necessary. You can also disable or
 // set any other middleware individually, using a configuration object.
 
+app.use(noCache());
+
 const ninetyDaysInSeconds = 90 * 24 * 60 * 60;
 
 app.use(
@@ -76,12 +79,14 @@ app.use(
       // enable and configure
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["style.com"],
+        styleSrc: ["'self'", "style.com"],
         scriptSrc: ["'self'", "trusted-cdn.com"],
+        fontSrc: ["'self'", "data:"],
+        imgSrc: ["'self'", "data:"],
       },
     },
     dnsPrefetchControl: false, // disable
-    noCache: true, // enable
+    // noCache: true, // deprecated and will be removed in helmet@4
     hsts: { maxAge: ninetyDaysInSeconds, force: true },
   })
 );
@@ -93,13 +98,13 @@ app.use(
 // ---- DO NOT EDIT BELOW THIS LINE ---------------------------------------
 
 module.exports = app;
-var api = require("./server.js");
+const api = require("./server.js");
 app.use(express.static("public"));
 app.disable("strict-transport-security");
 app.use("/_api", api);
 app.get("/", function (request, response) {
-  response.sendFile(__dirname + "/views/index.html");
+  response.sendFile(path.join(__dirname, "views", "index.html"));
 });
-var listener = app.listen(process.env.PORT || 3000, function () {
+const listener = app.listen(process.env.PORT || 3000, function () {
   console.log("Your app is listening on port " + listener.address().port);
 });

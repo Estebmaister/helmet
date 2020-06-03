@@ -147,7 +147,23 @@ To improve performance, most browsers prefetch DNS records for the links in a pa
 
 If you are releasing an update for your website, and you want the users to always download the newer version, you can (try to) disable caching on client’s browser. It can be useful in development too. Caching has performance benefits, which you will lose, so only use this option when there is a real need.
 
-- Added to myApp.js `app.use(helmet.noCache());`
+- Added to myApp.js `app.use(helmet.noCache());` // Deprecated
+
+- Cache-Control is a header that has many directives. For example, Cache-Control: max-age=864000 will tell browsers to cache the response for 10 days. In those 10 days, browsers will pull from their caches. Setting this header to Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate will obliterate caching, as far as this header is concerned.
+- Surrogate-Control is another header that CDNs respect. You can use it to tell intermediate caches to eschew caching.
+- Pragma is a legacy HTTP header. Setting Pragma: no-cache will tell supported browsers to stop caching the response. It has fewer features than Cache-Control but it can better support old browsers.
+- Expires specifies when the content should be considered out of date, or expired. Setting this to 0 will tell browsers the content expires immediately. In other words, they shouldn’t cache it.
+
+nocache is a relatively simple middleware that will set the four HTTP headers noted above: Cache-Control, Surrogate-Control, Pragma, and Expires.
+
+```js
+// Make sure you run "npm install nocache" to get the nocache package.
+const noCache = require("nocache");
+
+app.use(noCache());
+```
+
+This header is not included in the default Helmet bundle, and will be removed in future versions of Helmet.
 
 **[⬆ back to top](#table-of-contents)**
 
@@ -203,31 +219,80 @@ app.use(
 
 We introduced each middleware separately for teaching purposes and for ease of testing. Using the ‘parent’ `helmet()` middleware is easy to implement in a real project.
 
+Helmet is a collection of 12 smaller middleware functions that set HTTP response headers. Running app.use(helmet()) will not include all of these middleware functions by default.
+
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Default?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://helmetjs.github.io/docs/csp/" rel="nofollow">contentSecurityPolicy</a> for setting Content Security Policy</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="https://helmetjs.github.io/docs/crossdomain/" rel="nofollow">crossdomain</a> for handling Adobe products' crossdomain requests</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="https://helmetjs.github.io/docs/dns-prefetch-control" rel="nofollow">dnsPrefetchControl</a> controls browser DNS prefetching</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><a href="https://helmetjs.github.io/docs/expect-ct/" rel="nofollow">expectCt</a> for handling Certificate Transparency</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="https://helmetjs.github.io/docs/feature-policy/" rel="nofollow">featurePolicy</a> to limit your site's features</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="https://helmetjs.github.io/docs/frameguard/" rel="nofollow">frameguard</a> to prevent clickjacking</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><a href="https://helmetjs.github.io/docs/hide-powered-by" rel="nofollow">hidePoweredBy</a> to remove the X-Powered-By header</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><a href="https://helmetjs.github.io/docs/hsts/" rel="nofollow">hsts</a> for HTTP Strict Transport Security</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><a href="https://helmetjs.github.io/docs/ienoopen" rel="nofollow">ieNoOpen</a> sets X-Download-Options for IE8+</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><a href="https://helmetjs.github.io/docs/dont-sniff-mimetype" rel="nofollow">noSniff</a> to keep clients from sniffing the MIME type</td>
+<td>✓</td>
+</tr>
+<tr>
+<td><a href="https://helmetjs.github.io/docs/referrer-policy" rel="nofollow">referrerPolicy</a> to hide the Referer header</td>
+<td></td>
+</tr>
+<tr>
+<td><a href="https://helmetjs.github.io/docs/xss-filter" rel="nofollow">xssFilter</a> adds some small XSS protections</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+
+You can see more in <a href="https://helmetjs.github.io/docs/" rel="nofollow">the documentation</a>.
+
 **[⬆ back to top](#table-of-contents)**
 
-### 12. Get Data from POST Requests
+### 12. Understand BCrypt Hashes
 
-Mount a POST handler at the path `/name`. It’s the same path as before. We have prepared a form in the html frontpage. It will submit the same data of exercise 10 (Query string). If the body-parser is configured correctly, you should find the parameters in the object `req.body`. Have a look at the usual library example:
+For the following challenges, you will be working with a new starter project that is different from the previous one. You can find the new starter project on Glitch, or clone it from GitHub.
 
-```node
-route: POST '/library'
-urlencoded_body: userId=546&bookId=6754
-req.body: {userId: '546', bookId: '6754'}
-```
+BCrypt hashes are very secure. A hash is basically a fingerprint of the original data- always unique. This is accomplished by feeding the original data into an algorithm and returning a fixed length result. To further complicate this process and make it more secure, you can also salt your hash. Salting your hash involves adding random data to the original data before the hashing process which makes it even harder to crack the hash.
 
-Respond with the same JSON object as before: `{name: 'firstname lastname'}`. Test if your endpoint works using the html form we provided in the app frontpage.
+BCrypt hashes will always looks like `$2a$13$ZyprE5MRw2Q3WpNOGZWGbeG7ADUre1Q8QO.uUUtcbqloU0yvzavOm` which does have a structure. The first small bit of data `$2a` is defining what kind of hash algorithm was used. The next portion `$13` defines the cost. Cost is about how much power it takes to compute the hash. It is on a logarithmic scale of 2^cost and determines how many times the data is put through the hashing algorithm. For example, at a cost of 10 you are able to hash 10 passwords a second on an average computer, however at a cost of 15 it takes 3 seconds per hash... and to take it further, at a cost of 31 it would takes multiple days to complete a hash. A cost of 12 is considered very secure at this time. The last portion of your hash `$ZyprE5MRw2Q3WpNOGZWGbeG7ADUre1Q8QO.uUUtcbqloU0yvzavOm`, looks like one large string of numbers, periods, and letters but it is actually two separate pieces of information. The first 22 characters is the salt in plain text, and the rest is the hashed password!
 
-Tip: There are several other http methods other than GET and POST. And by convention there is a correspondence between the http verb, and the operation you are going to execute on the server. The conventional mapping is:
-
-POST (sometimes PUT) - Create a new resource using the information sent with the request,
-
-GET - Read an existing resource without modifying it,
-
-PUT or PATCH (sometimes POST) - Update a resource using the data sent,
-
-DELETE => Delete a resource.
-
-There are also a couple of other methods which are used to negotiate a connection with the server. Except from GET, all the other methods listed above can have a payload (i.e. the data into the request body). The body-parser middleware works with these methods as well.
+To begin using BCrypt, add it as a dependency in your project and require it as 'bcrypt' in your server.
 
 **[⬆ back to top](#table-of-contents)**
 
@@ -255,7 +320,7 @@ There are also a couple of other methods which are used to negotiate a connectio
 
 <!-- Glitch web and workflow -->
 
-[website]: https://node-esteb.glitch.me
-[website-bdg]: https://img.shields.io/website?down_color=violet&down_message=sleeping&label=servidor&logo=glitch&logoColor=white&style=plastic&up_color=green&up_message=online&url=https%3A%2F%2Fnode-esteb.glitch.me
+[website]: https://helmet-esteb.glitch.me
+[website-bdg]: https://img.shields.io/website?down_color=violet&down_message=sleeping&label=servidor&logo=glitch&logoColor=white&style=plastic&up_color=green&up_message=online&url=https%3A%2F%2Fhelmet-esteb.glitch.me
 [workflow-bdg]: https://github.com/estebmaister/helmet/workflows/Glitch%20Sync/badge.svg
 [glitch-workflow]: https://github.com/Estebmaister/helmet/blob/master/.github/workflows/main.yml
