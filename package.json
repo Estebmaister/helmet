@@ -1,18 +1,19 @@
 {
   "name": "fcc-infosec-challenges",
+  "author": "http://github.com/estebmaister",
   "version": "0.1.0",
-  "description": "fcc backend boilerplate",
+  "description": "fcc backend security",
   "main": "server.js",
   "scripts": {
     "start": "node myApp.js"
   },
   "dependencies": {
-    "express": "^4.14.0",
-    "helmet": "^3.22.0",
+    "express": "^4.17.1",
+    "helmet": "^3.22.1",
     "nocache": "^2.1.0"
   },
   "engines": {
-    "node": "4.4.5"
+    "node": "^14.0.0"
   },
   "keywords": [
     "node",
